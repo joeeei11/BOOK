@@ -59,6 +59,13 @@
           >取消订单</button>
           <button
             class="action-btn btn-primary-sm"
+            bindtap="confirmReceive"
+            data-order-id="{{item._id}}"
+            data-book-id="{{item.bookId}}"
+            wx:if="{{item.status === 'confirmed'}}"
+          >确认收货</button>
+          <button
+            class="action-btn btn-primary-sm"
             bindtap="goReview"
             data-order-id="{{item._id}}"
             data-reviewee-id="{{item.sellerId}}"
@@ -73,11 +80,10 @@
           </button>
           <button
             class="action-btn btn-primary-sm"
-            bindtap="confirmOrder"
+            bindtap="confirmSell"
             data-order-id="{{item._id}}"
-            data-book-id="{{item.bookId}}"
-            wx:if="{{item.status === 'pending' || item.status === 'confirmed'}}"
-          >确认完成</button>
+            wx:if="{{item.status === 'pending'}}"
+          >确认卖出</button>
         </block>
       </view>
     </view>

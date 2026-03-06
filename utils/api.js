@@ -128,7 +128,10 @@ const orderAPI = {
     // 取消订单（云函数方式，同时恢复书籍状态为在售）
     cancelOrder: (orderId) => callCloud('cancelOrder', { orderId }),
 
-    // 确认交易完成（云函数，同时将订单标记为完成、书籍标记为已售）
+    // 卖家确认卖出（云函数，pending → confirmed）
+    confirmOrder: (orderId) => callCloud('confirmOrder', { orderId }),
+
+    // 买家确认收货（云函数，confirmed → completed，书籍标记为已售）
     completeOrder: (orderId, bookId) => callCloud('completeOrder', { orderId, bookId })
 }
 

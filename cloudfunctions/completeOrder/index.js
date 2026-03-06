@@ -1,6 +1,5 @@
 // 云函数：completeOrder
-// 确认交易完成：订单状态→completed，书籍状态→sold
-// 需云函数处理：订单由买家创建，卖家无权更新；书籍虽由卖家创建但需同步完成
+// 买家确认收货：订单状态 confirmed → completed，书籍状态 → sold
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -14,14 +13,13 @@ exports.main = async (event) => {
     }
 
     try {
-        // 验证调用者是卖家
         const orderRes = await db.collection('orders').doc(orderId).get()
         const order = orderRes.data
-        if (order.sellerId !== OPENID) {
-            return { success: false, error: '只有卖家才能确认完成' }
+        if (order.buyerId !== OPENID) {
+            return { success: false, error: '只有买家才能确认收货' }
         }
-        if (order.status !== 'trading') {
-            return { success: false, error: '订单状态不正确' }
+        if (order.status !== 'confirmed') {
+            return { success: false, error: '订单状态不正确，需卖家先确认卖出' }
         }
 
         const now = db.serverDate()

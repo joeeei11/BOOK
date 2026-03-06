@@ -110,21 +110,49 @@ Page({
         }
     },
 
-    // 确认完成
-    async confirmOrder(e) {
-        const { orderId, bookId } = e.currentTarget.dataset
+    // 卖家确认卖出
+    async confirmSell(e) {
+        const orderId = e.currentTarget.dataset.orderId
         const res = await wx.showModal({
-            title: '确认交易完成',
-            content: '请确认您已完成线下交易',
-            confirmText: '确认完成'
+            title: '确认卖出',
+            content: '请确认您已同意出售此书籍，确认后等待买家确认收货',
+            confirmText: '确认卖出'
         })
         if (!res.confirm) return
 
         wx.showLoading({ title: '处理中...' })
         try {
-            await orderAPI.completeOrder(orderId, bookId)
-            wx.showToast({ title: '交易完成！' })
-            this.loadOrders()
+            const result = await orderAPI.confirmOrder(orderId)
+            if (result && result.success === false) {
+                wx.showToast({ title: result.error || '确认失败', icon: 'none' })
+            } else {
+                wx.showToast({ title: '已确认卖出' })
+                this.loadOrders()
+            }
+        } finally {
+            wx.hideLoading()
+        }
+    },
+
+    // 买家确认收货
+    async confirmReceive(e) {
+        const { orderId, bookId } = e.currentTarget.dataset
+        const res = await wx.showModal({
+            title: '确认收货',
+            content: '请确认您已收到书籍，确认后订单将完成',
+            confirmText: '确认收货'
+        })
+        if (!res.confirm) return
+
+        wx.showLoading({ title: '处理中...' })
+        try {
+            const result = await orderAPI.completeOrder(orderId, bookId)
+            if (result && result.success === false) {
+                wx.showToast({ title: result.error || '确认失败', icon: 'none' })
+            } else {
+                wx.showToast({ title: '交易完成！' })
+                this.loadOrders()
+            }
         } finally {
             wx.hideLoading()
         }
