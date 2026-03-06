@@ -1,36 +1,76 @@
-<!-- pages/message/message.wxml - 消息列表页 -->
+<!-- pages/message/message.wxml - 微信风格消息列表页 -->
 <view class="page-container message-page">
+  <!-- 搜索栏 -->
+  <view class="search-bar-wrap">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索联系人"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+      />
+      <text wx:if="{{searchKeyword}}" class="search-clear" bindtap="clearSearch">✕</text>
+    </view>
+  </view>
+
   <view wx:if="{{loading}}" class="loading-state">
     <view class="spinner"></view>
     <text class="text-secondary text-sm">加载中...</text>
   </view>
 
-  <view wx:elif="{{conversations.length > 0}}" class="conv-list">
+  <view wx:elif="{{filteredConversations.length > 0}}" class="conv-list">
     <view
-      wx:for="{{conversations}}"
+      wx:for="{{filteredConversations}}"
       wx:key="userId"
-      class="conv-item"
-      bindtap="goChat"
-      data-user-id="{{item.userId}}"
-      data-nick-name="{{item.nickName}}"
+      class="conv-item-wrap"
     >
-      <view class="conv-avatar-wrap">
-        <image class="conv-avatar" src="{{item.avatarUrl}}" mode="aspectFill" />
-        <view wx:if="{{item.unread > 0}}" class="unread-badge badge-pulse">{{item.unread > 99 ? '99+' : item.unread}}</view>
-      </view>
-      <view class="conv-info">
-        <view class="conv-top flex-between">
-          <text class="conv-name text-ellipsis">{{item.nickName}}</text>
-          <text class="conv-time text-xs text-secondary">{{item.lastMsgTime}}</text>
+      <!-- 可滑动的会话项 -->
+      <view
+        class="conv-item-slider"
+        style="transform: translateX({{item.slideX || 0}}rpx)"
+        data-index="{{index}}"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+      >
+        <!-- 会话主内容 -->
+        <view
+          class="conv-item"
+          bindtap="goChat"
+          data-user-id="{{item.userId}}"
+          data-nick-name="{{item.nickName}}"
+        >
+          <view class="conv-avatar-wrap">
+            <image class="conv-avatar" src="{{item.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill" />
+            <view wx:if="{{item.unread > 0}}" class="unread-badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
+          </view>
+          <view class="conv-info">
+            <view class="conv-top">
+              <text class="conv-name">{{item.nickName}}</text>
+              <text class="conv-time">{{item.lastMsgTime}}</text>
+            </view>
+            <text class="conv-last-msg">{{item.lastMsgPreview}}</text>
+          </view>
         </view>
-        <text class="conv-last-msg text-sm text-secondary text-ellipsis">{{item.lastMsgContent}}</text>
+      </view>
+
+      <!-- 删除按钮（滑出后显示） -->
+      <view class="conv-delete-btn" bindtap="deleteConversation" data-index="{{index}}" data-user-id="{{item.userId}}">
+        <text class="conv-delete-text">删除</text>
       </view>
     </view>
   </view>
 
+  <view wx:elif="{{searchKeyword}}" class="empty-state">
+    <text class="empty-icon">🔍</text>
+    <text class="text-secondary">没有找到相关联系人</text>
+  </view>
+
   <view wx:else class="empty-state">
     <text class="empty-icon">💬</text>
-    <text class="text-secondary">暂无消息</text>
-    <text class="empty-hint text-xs text-secondary">去首页看看感兴趣的书籍吧</text>
+    <text class="empty-title">暂无消息</text>
+    <text class="empty-hint">去首页看看感兴趣的书籍吧</text>
   </view>
 </view>

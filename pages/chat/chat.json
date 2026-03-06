@@ -1,4 +1,5 @@
 {
-    "navigationBarTitleText": "聊天",
-    "usingComponents": {}
+    "navigationStyle": "custom",
+    "usingComponents": {},
+    "disableScroll": false
 }

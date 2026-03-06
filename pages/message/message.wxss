@@ -1,8 +1,42 @@
-/* pages/message/message.wxss */
+/* pages/message/message.wxss - 微信风格消息列表 */
 .message-page {
   padding: 0;
+  background: #EDEDED;
 }
 
+/* ========== 搜索栏 ========== */
+.search-bar-wrap {
+  background: #EDEDED;
+  padding: 16rpx 20rpx;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 8rpx;
+  padding: 12rpx 20rpx;
+  gap: 12rpx;
+}
+
+.search-icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.search-clear {
+  font-size: 28rpx;
+  color: #b0b0b0;
+  padding: 4rpx 8rpx;
+}
+
+/* ========== 加载状态 ========== */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -11,49 +45,64 @@
   gap: 16rpx;
 }
 
+/* ========== 会话列表 ========== */
 .conv-list {
-  background: var(--color-white);
+  background: #fff;
+}
+
+.conv-item-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.conv-item-slider {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease;
 }
 
 .conv-item {
   display: flex;
   align-items: center;
   padding: 24rpx 30rpx;
-  border-bottom: 1rpx solid var(--color-border-light);
-  transition: background 0.15s;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
 .conv-item:active {
-  background: var(--color-bg);
+  background: #f5f5f5;
 }
 
+/* 方形圆角头像 */
 .conv-avatar-wrap {
   position: relative;
   margin-right: 20rpx;
+  flex-shrink: 0;
 }
 
 .conv-avatar {
   width: 96rpx;
   height: 96rpx;
-  border-radius: 50%;
-  background: var(--color-border);
+  border-radius: 10rpx;
+  background: #e0e0e0;
 }
 
+/* 未读红点 */
 .unread-badge {
   position: absolute;
-  top: -6rpx;
-  right: -6rpx;
+  top: -8rpx;
+  right: -8rpx;
   min-width: 36rpx;
   height: 36rpx;
-  background: var(--color-danger);
-  color: var(--color-white);
+  background: #fa5151;
+  color: #fff;
   font-size: 20rpx;
   border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 8rpx;
-  animation: pulse 2s ease-in-out infinite;
+  font-weight: 500;
 }
 
 .conv-info {
@@ -62,36 +111,79 @@
 }
 
 .conv-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8rpx;
 }
 
 .conv-name {
   font-size: 30rpx;
   font-weight: 500;
-  color: var(--color-text);
+  color: #333;
   max-width: 360rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .conv-time {
+  font-size: 22rpx;
+  color: #b0b0b0;
   flex-shrink: 0;
 }
 
 .conv-last-msg {
+  font-size: 26rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 480rpx;
+  display: block;
 }
 
+/* ========== 左滑删除 ========== */
+.conv-delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 160rpx;
+  background: #fa5151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.conv-delete-text {
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* ========== 空状态 ========== */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 200rpx 0;
+  gap: 8rpx;
 }
 
 .empty-icon {
   font-size: 80rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #999;
 }
 
 .empty-hint {
-  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #b0b0b0;
+  margin-top: 8rpx;
 }

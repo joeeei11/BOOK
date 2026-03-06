@@ -77,8 +77,9 @@ Page({
             wx.showToast({ title: '卖家信息异常', icon: 'none' })
             return
         }
+        const sellerName = this.data.seller ? (this.data.seller.nickName || '') : ''
         wx.navigateTo({
-            url: `/pages/chat/chat?userId=${book.sellerId}&bookId=${this.data.bookId}&bookTitle=${encodeURIComponent(book.title || '')}`
+            url: `/pages/chat/chat?userId=${book.sellerId}&bookId=${this.data.bookId}&bookTitle=${encodeURIComponent(book.title || '')}&nickName=${encodeURIComponent(sellerName)}`
         })
     },
 

@@ -86,6 +86,52 @@ const formatStars = (score) => {
 }
 
 /**
+ * 聊天时间格式化（微信风格）
+ * 今天: HH:MM
+ * 昨天: 昨天 HH:MM
+ * 本周: 周X HH:MM
+ * 更早: M月D日 HH:MM
+ * 跨年: YYYY年M月D日 HH:MM
+ */
+const formatChatTime = (date) => {
+    if (!date) return ''
+    const d = date instanceof Date ? date : new Date(date)
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const yesterday = new Date(today.getTime() - 86400000)
+    const weekAgo = new Date(today.getTime() - 6 * 86400000)
+
+    const hours = String(d.getHours()).padStart(2, '0')
+    const minutes = String(d.getMinutes()).padStart(2, '0')
+    const time = `${hours}:${minutes}`
+
+    if (d >= today) return time
+    if (d >= yesterday) return `昨天 ${time}`
+    if (d >= weekAgo) {
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+        return `${weekdays[d.getDay()]} ${time}`
+    }
+    if (d.getFullYear() === now.getFullYear()) {
+        return `${d.getMonth() + 1}月${d.getDate()}日 ${time}`
+    }
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${time}`
+}
+
+/**
+ * 判断两条消息之间是否需要显示时间分隔
+ * @param {Date|string} prevTime 上一条消息时间
+ * @param {Date|string} currTime 当前消息时间
+ * @param {number} gap 间隔毫秒数，默认5分钟
+ * @returns {boolean}
+ */
+const shouldShowTimeGroup = (prevTime, currTime, gap = 5 * 60 * 1000) => {
+    if (!prevTime) return true
+    const prev = prevTime instanceof Date ? prevTime : new Date(prevTime)
+    const curr = currTime instanceof Date ? currTime : new Date(currTime)
+    return Math.abs(curr - prev) >= gap
+}
+
+/**
  * 年级列表
  */
 const GRADES = ['2021', '2022', '2023', '2024', '2025']
@@ -107,6 +153,8 @@ module.exports = {
     formatBookStatus,
     getCreditLevel,
     formatStars,
+    formatChatTime,
+    shouldShowTimeGroup,
     GRADES,
     COLLEGES,
     CONDITION_MAP,

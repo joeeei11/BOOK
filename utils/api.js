@@ -134,14 +134,15 @@ const orderAPI = {
 
 // ===== 消息相关 =====
 const messageAPI = {
-    // 发送消息
-    sendMessage: (receiverId, content, bookId = '') => {
+    // 发送消息（支持 type: 'text' | 'image'）
+    sendMessage: (receiverId, content, bookId = '', type = 'text') => {
         const app = getApp()
         return wx.cloud.database().collection('messages').add({
             data: {
                 senderId: app.globalData.openid,
                 receiverId,
                 content,
+                type,
                 bookId,
                 isRead: false,
                 createTime: wx.cloud.database().serverDate()
@@ -149,8 +150,16 @@ const messageAPI = {
         })
     },
 
+    // 发送图片消息（先上传图片再创建消息）
+    sendImageMessage: async (receiverId, filePath, bookId = '') => {
+        const ext = filePath.split('.').pop()
+        const cloudPath = `chat/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+        const uploadRes = await wx.cloud.uploadFile({ cloudPath, filePath })
+        return messageAPI.sendMessage(receiverId, uploadRes.fileID, bookId, 'image')
+    },
+
     // 获取与某用户的聊天记录（云函数，需双向查询，客户端只能查自己发送的消息）
-    getChatHistory: (otherUserId) => callCloud('getChatHistory', { otherUserId }),
+    getChatHistory: (otherUserId, beforeTime) => callCloud('getChatHistory', { otherUserId, beforeTime }),
 
     // 标记消息为已读（云函数，消息属于发送者，接收者无权直接修改）
     markAsRead: (otherUserId) => callCloud('markMessagesRead', { senderId: otherUserId }),

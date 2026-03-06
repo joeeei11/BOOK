@@ -19,8 +19,14 @@ page {
   --color-border-light: #f5f5f5;
   --color-bg: #F5F6FA;
   --color-bg-input: #F5F6FA;
-  --color-bg-chat: #F0F2F5;
+  --color-bg-chat: #EDEDED;
   --color-white: #ffffff;
+
+  /* 微信聊天配色 */
+  --color-wechat-green: #95EC69;
+  --color-wechat-bg: #EDEDED;
+  --color-wechat-input-bg: #F7F7F7;
+  --color-wechat-send: #07C160;
 
   /* 字体大小 */
   --font-size-xl: 36rpx;

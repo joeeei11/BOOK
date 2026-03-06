@@ -1,13 +1,34 @@
-<!-- pages/chat/chat.wxml - 聊天页面 -->
+<!-- pages/chat/chat.wxml - 微信风格聊天页面（优化版） -->
 <view class="chat-page">
+  <!-- 自定义顶部导航栏（显示对方昵称） -->
+  <view class="custom-nav">
+    <view class="nav-status-bar" style="height:{{statusBarHeight}}px"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="goBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <view class="nav-center">
+        <text class="nav-title">{{otherUser.nickName || '对方'}}</text>
+      </view>
+      <view class="nav-right" bindtap="goUserProfile">
+        <text class="nav-more-icon">⋯</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 书籍信息卡片（聊天上下文） -->
   <view class="book-context" wx:if="{{bookInfo}}" bindtap="goBookDetail">
     <image class="book-thumb" src="{{bookInfo.coverImage || '/assets/images/book-placeholder.png'}}" mode="aspectFill" />
     <view class="book-context-info">
-      <text class="book-context-title text-ellipsis">{{bookInfo.title}}</text>
-      <text class="text-danger text-sm">¥{{bookInfo.price}}</text>
+      <text class="book-context-title">{{bookInfo.title}}</text>
+      <text class="book-context-price">¥{{bookInfo.price}}</text>
     </view>
-    <text class="text-secondary" style="font-size:32rpx;">›</text>
+    <view class="book-context-status">
+      <text class="book-status-text {{bookInfo.status !== 'on_sale' ? 'sold' : ''}}">
+        {{bookInfo.status === 'on_sale' ? '在售' : '已售'}}
+      </text>
+      <text class="book-arrow">›</text>
+    </view>
   </view>
 
   <!-- 聊天消息列表 -->
@@ -16,49 +37,120 @@
     scroll-y
     scroll-into-view="{{scrollToId}}"
     scroll-with-animation
+    enhanced
+    show-scrollbar="{{false}}"
   >
-    <view wx:if="{{messages.length === 0}}" class="empty-chat">
-      <text class="text-secondary text-sm">发送消息开始聊天吧～</text>
+    <view wx:if="{{messages.length === 0 && !loading}}" class="empty-chat">
+      <view class="empty-chat-icon">💬</view>
+      <text class="empty-chat-text">和{{otherUser.nickName || 'TA'}}打个招呼吧～</text>
     </view>
 
-    <view
-      wx:for="{{messages}}"
-      wx:key="_id"
-      id="msg-{{index}}"
-      class="msg-item {{item.senderId === myId ? 'msg-right' : 'msg-left'}}"
-    >
-      <!-- 对方消息 -->
-      <block wx:if="{{item.senderId !== myId}}">
-        <image class="msg-avatar" src="{{otherUser.avatarUrl || '/assets/images/default-avatar.png'}}" />
-        <view class="msg-bubble msg-bubble-left">
-          <text class="msg-text">{{item.content}}</text>
-        </view>
-      </block>
+    <block wx:for="{{messages}}" wx:key="_id">
+      <!-- 时间分隔符 -->
+      <view wx:if="{{item.showTime}}" class="time-divider">
+        <text class="time-divider-text">{{item.timeStr}}</text>
+      </view>
 
-      <!-- 我的消息 -->
-      <block wx:if="{{item.senderId === myId}}">
-        <view class="msg-bubble msg-bubble-right">
-          <text class="msg-text">{{item.content}}</text>
-        </view>
-        <image class="msg-avatar" src="{{myInfo.avatarUrl || '/assets/images/default-avatar.png'}}" />
-      </block>
-    </view>
+      <!-- 消息项 -->
+      <view
+        id="msg-{{index}}"
+        class="msg-item {{item.senderId === myId ? 'msg-right' : 'msg-left'}}"
+      >
+        <!-- 对方消息 -->
+        <block wx:if="{{item.senderId !== myId}}">
+          <image class="msg-avatar" src="{{otherUser.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill" bindtap="goUserProfile" />
+          <view class="msg-content-wrap">
+            <!-- 文本消息 -->
+            <view wx:if="{{item.type !== 'image'}}" class="msg-bubble msg-bubble-left">
+              <text class="msg-text">{{item.content}}</text>
+            </view>
+            <!-- 图片消息 -->
+            <view wx:else class="msg-img-wrap" bindtap="previewChatImage" data-src="{{item.content}}">
+              <image class="msg-image" src="{{item.content}}" mode="widthFix" />
+            </view>
+          </view>
+        </block>
+
+        <!-- 我的消息 -->
+        <block wx:if="{{item.senderId === myId}}">
+          <image class="msg-avatar" src="{{myInfo.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill" />
+          <view class="msg-content-wrap">
+            <!-- 发送状态指示 -->
+            <view wx:if="{{item.sending}}" class="msg-sending">
+              <view class="spinner spinner-sm"></view>
+            </view>
+            <!-- 文本消息 -->
+            <view wx:if="{{item.type !== 'image'}}" class="msg-bubble msg-bubble-right">
+              <text class="msg-text">{{item.content}}</text>
+            </view>
+            <!-- 图片消息 -->
+            <view wx:else class="msg-img-wrap" bindtap="previewChatImage" data-src="{{item.content}}">
+              <image class="msg-image" src="{{item.content}}" mode="widthFix" />
+            </view>
+          </view>
+        </block>
+      </view>
+    </block>
+
     <view id="msg-bottom" style="height:20rpx;"></view>
   </scroll-view>
 
-  <!-- 输入框 -->
-  <view class="input-bar">
-    <textarea
-      class="msg-input"
-      placeholder="发送消息..."
-      value="{{inputMsg}}"
-      bindinput="onMsgInput"
-      auto-height
-      maxlength="500"
-      adjust-position
-      confirm-type="send"
-      bindconfirm="sendMessage"
-    />
-    <button class="send-btn" bindtap="sendMessage" disabled="{{!inputMsg.trim()}}">发送</button>
+  <!-- 底部输入栏（精致微信风格） -->
+  <view class="input-bar" style="padding-bottom: {{keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom)'}};">
+    <view class="input-bar-inner">
+      <!-- 左侧：语音按钮 -->
+      <view class="toolbar-btn" bindtap="onVoiceTap">
+        <text class="toolbar-emoji">🎙️</text>
+      </view>
+
+      <!-- 中间：输入框 -->
+      <view class="input-wrap">
+        <textarea
+          class="msg-input"
+          placeholder="输入消息..."
+          value="{{inputMsg}}"
+          bindinput="onMsgInput"
+          bindfocus="onInputFocus"
+          bindblur="onInputBlur"
+          auto-height
+          maxlength="500"
+          adjust-position="{{true}}"
+          confirm-type="send"
+          bindconfirm="sendMessage"
+          cursor-spacing="20"
+          show-confirm-bar="{{false}}"
+        />
+      </view>
+
+      <!-- 右侧：表情 + 发送/加号 -->
+      <view class="toolbar-btn" bindtap="onEmojiTap">
+        <text class="toolbar-emoji">😊</text>
+      </view>
+
+      <view wx:if="{{inputMsg.trim()}}" class="send-btn" bindtap="sendMessage">
+        <text class="send-btn-text">发送</text>
+      </view>
+      <view wx:else class="toolbar-btn" bindtap="showMoreActions">
+        <text class="toolbar-emoji toolbar-plus">⊕</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 更多操作面板 -->
+  <view class="more-panel {{showMore ? 'show' : ''}}">
+    <view class="more-grid">
+      <view class="more-item" bindtap="chooseImage">
+        <view class="more-item-icon icon-photo">📷</view>
+        <text class="more-item-text">相册</text>
+      </view>
+      <view class="more-item" bindtap="takePhoto">
+        <view class="more-item-icon icon-camera">📸</view>
+        <text class="more-item-text">拍摄</text>
+      </view>
+      <view class="more-item" bindtap="createOrderFromChat" wx:if="{{bookInfo && bookInfo.status === 'on_sale' && bookInfo.sellerId !== myId}}">
+        <view class="more-item-icon icon-buy">🛒</view>
+        <text class="more-item-text">购买</text>
+      </view>
+    </view>
   </view>
 </view>
