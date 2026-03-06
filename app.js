@@ -14,16 +14,19 @@ App({
       return
     }
 
-    // 读取已保存的云环境ID
-    // 首次使用时请在微信开发者工具中开通云开发，并将环境ID填入下方
     const envId = wx.getStorageSync('cloudEnvId') || 'ap1-8gk9kxnc5bdb9f7a'
     wx.cloud.init({
       env: envId,
       traceUser: true
     })
 
-    // 检查登录状态
+    // 检查本地缓存的登录状态
     this.checkLogin()
+
+    // 未登录或资料未完善 → 跳转登录页
+    if (!this.globalData.openid || !this.globalData.userInfo || !this.globalData.userInfo.nickName) {
+      wx.reLaunch({ url: '/pages/login/login' })
+    }
   },
 
   // 设置云环境ID（首次使用时调用）
