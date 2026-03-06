@@ -29,14 +29,16 @@ const userAPI = {
     // 获取任意用户公开信息（云函数，绕过"仅创建者可读"权限）
     getUserInfo: (userId) => callCloud('getUserPublicInfo', { userId }),
 
-    // 更新自己的用户信息（自己的文档，有写权限）
+    // 更新自己的用户信息（通过云函数，确保有写权限）
     updateUserInfo: (data) => {
-        const app = getApp()
-        return wx.cloud.database().collection('users').doc(app.globalData.openid).update({ data })
-            .then(() => {
-                app.globalData.userInfo = { ...app.globalData.userInfo, ...data }
-                wx.setStorageSync('userInfo', app.globalData.userInfo)
-            })
+        return callCloud('updateUserInfo', data).then(res => {
+            if (res && res.success === false) {
+                throw new Error(res.error || '更新失败')
+            }
+            const app = getApp()
+            app.globalData.userInfo = { ...app.globalData.userInfo, ...data }
+            wx.setStorageSync('userInfo', app.globalData.userInfo)
+        })
     }
 }
 
