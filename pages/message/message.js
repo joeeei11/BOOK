@@ -16,6 +16,7 @@ Page({
     },
 
     onShow() {
+        if (!getApp().ensureProfile()) return
         this.loadConversations()
     },
 

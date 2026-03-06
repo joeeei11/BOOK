@@ -32,9 +32,7 @@ Page({
         const windowInfo = wx.getWindowInfo()
         this.setData({ statusBarHeight: windowInfo.statusBarHeight || 20 })
 
-        if (!app.globalData.openid) {
-            wx.showToast({ title: '请先登录', icon: 'none' })
-            wx.navigateBack()
+        if (!app.ensureProfile()) {
             return
         }
 

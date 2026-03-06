@@ -20,6 +20,10 @@ Page({
     },
 
     onShow() {
+        // 检查用户是否已完善资料
+        const app = getApp()
+        if (app.globalData.openid && !app.ensureProfile()) return
+
         // 返回首页时刷新列表（比如发布了新书）
         if (!this.data.loading) {
             this.loadBooks(true)

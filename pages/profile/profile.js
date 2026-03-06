@@ -75,8 +75,13 @@ Page({
 
     onShow() {
         if (this.data.isSelf) {
-            // 刷新用户信息（修改资料后）
             const app = getApp()
+            // 检查是否已完善资料
+            if (app.globalData.openid && !app.globalData.userInfo?.nickName) {
+                wx.navigateTo({ url: '/pages/login/login' })
+                return
+            }
+            // 刷新用户信息（修改资料后）
             if (app.globalData.userInfo) {
                 const userInfo = app.globalData.userInfo
                 const creditStars = formatStars(Math.min(5, Math.max(1, Math.round((userInfo.creditScore - 80) / 10))))

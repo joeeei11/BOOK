@@ -30,6 +30,10 @@ Page({
         submitting: false
     },
 
+    onShow() {
+        if (!getApp().ensureProfile()) return
+    },
+
     async onLoad(options) {
         const { id } = options
         if (id) {

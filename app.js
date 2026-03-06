@@ -77,6 +77,19 @@ App({
     return this.globalData.userInfo
   },
 
+  // 检查用户是否已完善资料（有昵称），未完善则跳转填写页
+  ensureProfile() {
+    if (!this.globalData.openid) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return false
+    }
+    if (!this.globalData.userInfo || !this.globalData.userInfo.nickName) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return false
+    }
+    return true
+  },
+
   // 退出登录
   logout() {
     this.globalData.userInfo = null
