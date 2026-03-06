@@ -38,7 +38,7 @@ Page({
         // 先设置临时显示名称
         this.setData({
             otherUserId: userId,
-            bookId,
+            bookId: bookId || '',
             myId: app.globalData.openid,
             otherUser: { nickName: nickName || bookTitle || '加载中...' }
         })
